@@ -47,15 +47,16 @@ export class AppComponent {
     const result: CsvRow[] = [];
 
     // Regex to find IPv4 with optional port
-    // Captures: Group 1 (IP), Group 2 (Port - Optional)
-    // Matches: 192.168.1.1 or 192.168.1.1:8080
-    const ipPortRegex = /\b((?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))(?::(\d{1,5}))?\b/g;
+    const ipv4Regex = /\b((?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))(?::(\d{1,5}))?\b/g;
+
+    // Regex for IPv6 (in brackets) with optional port
+    const ipv6Regex = /\[([a-fA-F0-9:.]+)\](?::(\d{1,5}))?/g;
 
     for (const line of lines) {
       if (!line.trim()) continue;
 
       // 1. Find all IPs in the current line (supports multiple IPs per line/json/messy text)
-      const matches = [...line.matchAll(ipPortRegex)];
+      const matches = [...line.matchAll(ipv4Regex), ...line.matchAll(ipv6Regex)];
       
       if (matches.length === 0) continue;
 
@@ -157,7 +158,7 @@ export class AppComponent {
 
     this.isAiLoading.set(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env['API_KEY'] });
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       
       const customInstruction = this.aiPrompt().trim();
       const prompt = `

@@ -1,0 +1,7 @@
+name = "ip-port-splitter"
+compatibility_date = "2026-02-19"
+
+# This tells Wrangler that this is a static site project
+# and the build output directory is "dist".
+[site]
+bucket = "./dist"
