@@ -1,0 +1,5 @@
+{
+  "name": "IP Port Splitter",
+  "description": "A utility to instantly separate IP addresses from port numbers with support for IPv4 and IPv6.",
+  "requestFramePermissions": []
+}

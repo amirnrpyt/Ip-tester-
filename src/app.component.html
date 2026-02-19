@@ -1,0 +1,231 @@
+<div class="h-screen w-full p-4 md:p-6 flex flex-col items-center justify-center font-sans overflow-hidden relative bg-black">
+  
+  <!-- Main Container: Slightly lighter than black (Zinc 950) for contrast against the body -->
+  <div class="flex-1 max-w-7xl mx-auto w-full bg-zinc-950 border border-zinc-800 rounded-[2rem] shadow-2xl shadow-emerald-900/10 overflow-hidden flex flex-col md:flex-row relative z-10">
+     
+     <!-- RIGHT COLUMN (Input): Zinc 950 -->
+     <div class="w-full md:w-5/12 lg:w-4/12 flex flex-col bg-zinc-950 p-6 md:p-8 border-b md:border-b-0 md:border-l border-zinc-800 relative">
+        
+        <!-- Header -->
+        <div class="mb-6">
+           <div class="flex items-center gap-3 mb-2">
+             <div class="w-12 h-12 bg-black border border-emerald-500/30 rounded-2xl flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.1)]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+             </div>
+             <div>
+               <h1 class="text-2xl font-black text-white tracking-tight drop-shadow-sm">IP SPLITTER</h1>
+               <div class="flex items-center gap-2">
+                   <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
+                   <p class="text-emerald-400 text-xs font-bold tracking-wide">TERMINAL EDITION</p>
+               </div>
+             </div>
+           </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="flex-1 relative flex flex-col mb-5 group">
+           <div class="flex items-center justify-between mb-2 px-1">
+              <span class="text-xs font-bold text-emerald-400">ورودی داده‌ها</span>
+              @if (fileName()) {
+                <span class="text-[10px] bg-emerald-900/20 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/30 font-bold truncate max-w-[150px]" title="{{fileName()}}">
+                   فایل: {{ fileName() }}
+                </span>
+              }
+           </div>
+
+           <!-- Input Container: Pure Black for high contrast against Zinc-950 -->
+           <div class="relative flex-1 bg-black rounded-3xl border border-zinc-700 focus-within:border-emerald-500 transition-all duration-300 overflow-hidden shadow-inner">
+             
+             <textarea 
+               [(ngModel)]="inputText"
+               class="w-full h-full p-5 bg-transparent outline-none resize-none font-mono text-sm text-emerald-50 placeholder:text-zinc-600 custom-scrollbar leading-relaxed relative z-10 caret-emerald-500"
+               placeholder="// داده‌ها را اینجا وارد کنید...
+192.168.1.1:8080"
+               dir="ltr"
+               spellcheck="false"
+               (drop)="onDrop($event)"
+               (dragover)="onDragOver($event)"
+             ></textarea>
+
+             <!-- Upload Button -->
+             <input #fileInput type="file" accept=".csv,.txt" class="hidden" (change)="onFileSelected($event)">
+             <button 
+               (click)="fileInput.click()"
+               class="absolute bottom-4 right-4 p-2.5 bg-zinc-800 hover:bg-emerald-900 text-zinc-400 hover:text-emerald-300 rounded-xl border border-zinc-700 hover:border-emerald-500 transition-all z-20 shadow-lg"
+               title="آپلود فایل"
+             >
+               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+               </svg>
+             </button>
+           </div>
+        </div>
+
+        <!-- AI Instruction -->
+        <div class="mb-6">
+           <label class="text-xs font-bold text-emerald-400 mb-2 block px-1">فیلتر هوشمند</label>
+           <div class="relative group">
+             <input 
+               type="text" 
+               [(ngModel)]="aiPrompt"
+               placeholder="دستور خاصی دارید؟ (مثلاً: فقط پورت‌های 80)"
+               class="w-full py-3 px-4 bg-black border border-zinc-700 rounded-2xl text-white text-sm focus:border-emerald-500 outline-none transition-all placeholder:text-zinc-600 focus:shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+             >
+           </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col gap-3 mt-auto">
+            <div class="flex gap-2">
+               <!-- Standard Process -->
+               <button 
+                 (click)="processInput()"
+                 [disabled]="!inputText() || isAiLoading()"
+                 class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white disabled:opacity-50 disabled:cursor-not-allowed py-3.5 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border border-zinc-700 hover:border-zinc-500 shadow-md"
+               >
+                  <span>استخراج ساده</span>
+               </button>
+
+               <!-- Clear -->
+               @if (inputText()) {
+                 <button 
+                   (click)="clearAll()"
+                   [disabled]="isAiLoading()"
+                   class="px-4 bg-zinc-800 hover:bg-red-950/30 text-red-400 border border-zinc-700 hover:border-red-500/50 rounded-2xl transition-all shadow-md"
+                   title="پاکسازی"
+                 >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                 </button>
+               }
+            </div>
+
+            <!-- AI Process Button -->
+            <button 
+             (click)="processWithAi()"
+             [disabled]="!inputText() || isAiLoading()"
+             class="group w-full bg-emerald-900/20 hover:bg-emerald-900/40 text-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed py-3.5 rounded-2xl font-black transition-all flex items-center justify-center gap-2 relative overflow-hidden border border-emerald-500/30 hover:border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.05)] hover:shadow-[0_0_25px_rgba(16,185,129,0.15)]"
+           >
+              @if (isAiLoading()) {
+                <span class="flex items-center gap-2 text-sm">
+                   <svg class="animate-spin h-4 w-4 text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    درحال تحلیل...
+                </span>
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                </svg>
+                <span>پردازش هوشمند (AI)</span>
+              }
+           </button>
+        </div>
+     </div>
+
+     <!-- LEFT COLUMN (Output): Zinc 950 -->
+     <div class="w-full md:w-7/12 lg:w-8/12 flex flex-col p-6 md:p-8 relative bg-zinc-950">
+        
+        <!-- Stats Bar -->
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+           <div class="flex items-center gap-3">
+              <div class="bg-black border border-zinc-700 rounded-2xl px-4 py-2 min-w-[100px] flex flex-col items-center shadow-sm">
+                 <span class="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">کل رکوردها</span>
+                 <span class="text-xl font-bold text-white">{{ stats().total }}</span>
+              </div>
+              <div class="bg-black border border-zinc-700 rounded-2xl px-4 py-2 min-w-[100px] flex flex-col items-center shadow-sm">
+                 <span class="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">نمایش فعلی</span>
+                 <span class="text-xl font-bold text-emerald-400">{{ stats().filteredCount }}</span>
+              </div>
+           </div>
+
+           <div class="flex items-center gap-3 flex-wrap w-full md:w-auto">
+              <!-- Hide Port Toggle -->
+              <label class="flex items-center gap-2 cursor-pointer group select-none bg-black px-4 py-2.5 rounded-2xl border border-zinc-700 hover:border-emerald-500/50 transition-all shadow-sm">
+                <div class="relative">
+                    <input type="checkbox" [ngModel]="hidePort()" (ngModelChange)="hidePort.set($event)" class="sr-only peer">
+                    <div class="w-9 h-5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-zinc-500 after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600 peer-checked:after:bg-white peer-checked:after:border-transparent"></div>
+                </div>
+                <span class="text-xs font-bold text-zinc-300 group-hover:text-white transition-colors">حذف پورت</span>
+              </label>
+
+              <!-- Country Select -->
+              <div class="flex-1 md:flex-none relative group">
+                  <select 
+                    [(ngModel)]="selectedCountry"
+                    class="w-full md:w-48 appearance-none bg-black border border-zinc-700 text-emerald-400 text-xs font-bold rounded-2xl focus:border-emerald-500 block p-2.5 pr-8 outline-none transition-all cursor-pointer hover:bg-zinc-900 shadow-sm"
+                  >
+                    <option value="ALL">همه کشورها</option>
+                    @for (country of availableCountries(); track country) {
+                      <option [value]="country">{{ country }}</option>
+                    }
+                  </select>
+                  <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-emerald-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </div>
+              </div>
+           </div>
+        </div>
+
+        <!-- Terminal Output: Green on Black -->
+        <div class="flex-1 relative bg-black rounded-3xl border border-zinc-700 flex flex-col group overflow-hidden shadow-inner">
+           <!-- Header -->
+           <div class="bg-zinc-900/50 px-6 py-3 flex items-center justify-between border-b border-zinc-800">
+              <span class="text-xs font-bold text-emerald-400 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                خروجی نهایی
+              </span>
+              <button 
+                  (click)="copyToClipboard(finalOutput(), 'output')"
+                  [disabled]="!finalOutput()"
+                  class="text-xs font-bold text-zinc-400 hover:text-white transition-colors flex items-center gap-1 disabled:opacity-30"
+                >
+                  @if (copiedField() === 'output') {
+                     <span class="text-emerald-400">کپی شد!</span>
+                  } @else {
+                     <span>کپی در حافظه</span>
+                  }
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </button>
+           </div>
+           
+           <!-- Textarea: Matrix Green Text -->
+           <textarea 
+              readonly
+              class="flex-1 w-full h-full p-6 bg-transparent text-emerald-400 font-mono text-sm leading-relaxed resize-none focus:outline-none custom-scrollbar selection:bg-emerald-900 selection:text-white"
+              dir="ltr"
+              [value]="finalOutput()"
+              placeholder="منتظر ورودی..."
+           ></textarea>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="mt-6 flex justify-end gap-3">
+           <button 
+             (click)="downloadResult()"
+             [disabled]="!finalOutput()"
+             class="flex items-center gap-2 px-6 py-3.5 bg-zinc-800 hover:bg-zinc-700 text-emerald-400 hover:text-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed border border-zinc-700 hover:border-emerald-500/50 rounded-2xl transition-all font-bold text-sm shadow-lg"
+           >
+             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+             </svg>
+             <span>دانلود خروجی (TXT)</span>
+           </button>
+        </div>
+
+     </div>
+
+  </div>
+  
+  <div class="mt-4 flex items-center gap-2 text-zinc-500 text-[10px] font-bold tracking-wide">
+    <span>SYSTEM READY</span>
+    <span class="w-1 h-1 bg-zinc-500 rounded-full"></span>
+    <span>POWERED BY GEMINI AI</span>
+  </div>
+</div>
