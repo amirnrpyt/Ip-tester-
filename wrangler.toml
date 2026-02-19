@@ -1,4 +1,4 @@
-name = "ip-port-splitter"
+name = "lptester"
 compatibility_date = "2026-02-19"
 
 # This tells Wrangler that this is a static site project
