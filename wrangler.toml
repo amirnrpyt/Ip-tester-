@@ -1,4 +1,4 @@
-name = "lptester"
+name = "ipadresses"
 main = "src/worker.ts"
 compatibility_date = "2026-02-19"
 
